@@ -154,8 +154,6 @@ $ uname -r
 ```
 $ sudo apt-get update                  //更新Ubuntu的套件
 $ sudo apt-get install docker-engine   //安裝Docker
-$ sudo service docker start            //開啟Docker
-$ sudo docker run hello-world          //Run一個Docker 確定是沒問題的
 ```
 
 快速安裝
@@ -163,6 +161,14 @@ $ sudo docker run hello-world          //Run一個Docker 確定是沒問題的
 ```
 curl http://files.imaclouds.com/scripts/docker_install.sh | sh
 ```
+
+安裝後可以試試看如何開啟並建立Docker
+
+```
+$ sudo service docker start            //開啟Docker
+$ sudo docker run hello-world          //Run一個Docker 確定是沒問題的
+```
+
 
 ---
 
