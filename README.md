@@ -705,35 +705,188 @@ root@80787210307a:/#
 ```docker attach``` 亦是Docker內建的命令。下面示例如何使用該命令。
 
 ```
+sudo docker run -idt ubuntu
+//顯示
+31f9479fec8be34fb782b5bbb6f6f90d341596fb605d274c90b3ebec9b215912
+$ sudo docker ps
+//顯示
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+31f9479fec8b        ubuntu              "/bin/bash"         24 seconds ago      Up 23 seconds                           cranky_visvesvaraya
+$ sudo docker attach cranky_visvesvaraya
+//顯示
+root@31f9479fec8b:/#  
+```
+但是使用 attach 命令有時候並不方便。當多個窗口同時 attach 到同一個Container的時候，所有窗口都會同步顯示。當某個窗口因命令阻塞時,其他窗口也無法執行操作了。
+
+**nsenter 命令**
+
+**安裝**
+
+```nsenter``` 直接下載最新版2.28版來使用
 
 ```
+$ curl https://www.kernel.org/pub/linux/utils/util-linux/v2.28/util-linux-2.28.tar.gz | tar -zxf-; cd util-linux-2.28
+$ ./configure --without-ncurses
+$ make nsenter && sudo cp nsenter /usr/local/bin
+```
+**使用**
+
+```nsenter``` 可以存取另一個程式的命名空間。```nsenter``` 要正常工作需要有 root 權限。
 
 
+```
+$ sudo docker run -tdi ubuntu
+//顯示
+dc947049c99b805ba705319c02ce76385794b1f5b3e5526e54aca04428bf417d
+$ sudo docker ps
+//顯示
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+dc947049c99b        ubuntu              "/bin/bash"         2 minutes ago       Up 2 minutes                            high_swartz
+$ echo $(docker-pid dc947049c99b)
+//顯示
+13830
+$ sudo nsenter --target 13830 --mount --uts --ipc --net --pid
+顯示
+root@dc947049c99b:/# 
+```
+再使用上面的指令之前，請先執行下面的命令
 
+```
+$ wget -P ~ https://github.com/yeasy/docker_practice/raw/master/_local/.bashrc_docker;
+$ echo "[ -f ~/.bashrc_docker ] && . ~/.bashrc_docker" >> ~/.bashrc; source ~/.bashrc
+```
+透過上面這個指令就可以定義很多Docker的命令
 
+---
+##匯出與匯入
+---
+###匯出和匯入容器
+---
 
+**匯出容器**
 
+匯出本地某個Container，可以使用 docker export 命令。
 
+```
+$ sudo docker ps -a
+//建立
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+dc947049c99b        ubuntu              "/bin/bash"         17 minutes ago      Up 17 minutes                           high_swartz
+$ sudo docker export dc947049c99b > ubuntu.tar
+```
+匯出Container快照到本機檔案
 
+**匯入快照容器**
 
+可以使用```docker import```從Container快照檔案中再匯入為Image
 
+EX:
 
+```
+$ cat ubuntu.tar | sudo docker import - test/buntu:v1.0
+$ sudo docker images
+//建立
+REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+test/buntu              v1.0                0228e522e40c        3 minutes ago       108.8 MB
+ubuntu                  14.04               8fa7f61732d6        5 days ago          188 MB
+```
+此外，也可以透過指定 URL 或者某個目錄來匯入
 
+EX：
 
+```
+$ sudo docker import http://example.com/exampleimage.tgz example/imagerepo
+```
+P.S.：使用者既可以使用 ```docker load ```來匯入映像檔儲存檔案到本地映像檔庫，也可以使用 ```docker import``` 來匯入一個Container快照到本機Image。這兩者的區別在於Container快照檔案僅保存Container當時的快照狀態，而Image儲存檔案將保存完整記錄，檔案體積也跟著變大。此外，從Container快照檔案匯入時可以重新指定標籤等原始資料訊息。
 
+---
+##刪除
+---
+###刪除容器
+---
+可以使用```docker rm```來刪除一個處於終止狀態的Container。
 
+EX：
 
+```
+$ sudo docker rm 9e5b1a1c60ae
+9e5b1a1c60ae
+```
+如果要刪除一個執行中的容器，可以新增 -f 參數。Docker 會發送 ```SIGKILL``` 信號給容器。
 
+---
 
+#倉儲
+---
+##倉儲
+---
 
+倉儲（Repository）是集中存放Image的地方。
 
+容易混淆的大概是註冊伺服器（Registry）。註冊伺服器是管理Repository的具體伺服器，每個伺服器上有很多個Repository，而每個Repository下面有多個Image。從這方面來說，Repository可以被認為是一個具體的專案或目錄。
 
+EX:
 
+Repository位址：dl.dockerpool.com/ubuntu
 
+dl.dockerpool.com是註冊伺服器位址
 
+ubuntu 是Repository名稱。
 
+其實有些時候，並不用太區分他們
 
+---
+##Docker Hub
+---
+###Docker Hub
+---
 
+目前 Docker 官方維護了一個公共倉庫 [Docker Hub](https://hub.docker.com/)  ,這裡有非常多的的Image。只要是你要的需求，基本上都可以Docker Hub中直接下載Image來實作
+
+**登錄**
+可以透過執行 ```docker login ```命令來輸入使用者名稱、密碼和電子信箱來完成註冊和登錄。
+
+**基本操作**
+
+使用者無需登錄即可透過``` docker search``` 命令來查詢官方倉庫中的映像檔，並利用 ```docker pull``` 命令來將它下載到本地。
+
+```
+$ sudo docker search ubuntu
+//顯示
+NAME                              DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED
+ubuntu                            Ubuntu is a Debian-based Linux operating s...   3778      [OK]       
+ubuntu-upstart                    Upstart is an event-based replacement for ...   61        [OK]       
+torusware/speedus-ubuntu          Always updated official Ubuntu docker imag...   25                   [OK]
+rastasheep/ubuntu-sshd            Dockerized SSH service, built on top of of...   24                   [OK]
+ubuntu-debootstrap                debootstrap --variant=minbase --components...   23        [OK]       
+```
+這邊顯示非常多的搜尋結果，有名字，描述，★，是否為官方建立，是否自動建立，官方的Image代表是由官方所建立維護的，automated資源允許User驗證Image的來源和內容。
+
+根據是否是官方提供，可將Image資源分為兩類。
+
+一種是類似 ubuntu 這樣的基礎Image，被稱為基礎或根Image。這些基礎Image是由 Docker 公司建立、驗證、支援、提供。這類的Image往往使用單個單詞作為名字。
+
+另一種類型例如wolibohebadon/ca22006 映像檔，它是由 Docker 的使用者建立並維護的，往往帶有使用者名稱。可以透過user_name/ 來指定使用某個使用者提供的Image，比如 wolibohebadon 使用者。
+
+另外，在查詢的時候透過 ```-s N``` 參數可以指定僅顯示評價為``` N``` 星以上的映像檔。
+
+這邊下載官方 ubuntu的Image 到本機
+
+```
+$ sudo docker pull ubuntu
+Using default tag: latest
+latest: Pulling from library/ubuntu
+72b39c1d4615: Pull complete 
+46a2d5ede4a6: Pull complete 
+d7caf6e91ad4: Pull complete 
+c7ac9f284354: Pull complete 
+a3ed95caeb02: Pull complete 
+```
+有```pull```就會有```push```，也可以將改好的Image push到Docker Hub。
+
+**自動建立**
+
+自動建立（Automated Builds）功能對於需要經常升級映像檔內程式來說，十分方便。 有時候，使用者建立了映像檔，安裝了某個軟體，如果軟體發布新版本則需要手動更新映像檔。。
 
 
 
