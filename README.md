@@ -176,26 +176,115 @@ $ sudo docker run hello-world          //Run一個Docker 確定是沒問題的
 
 ---
 
-在前面我有先提到Docker是由三個部分所組成，首先是映像檔
+在前面我有先提到Docker是由三個部分所組成，首先是映像檔。
 
 Docker 在執行Container前需要有本地端存在對應的Image，如果Image不存在本地端，Docker會從Image Repository下載（預設是 Docker Hub 公共註冊伺服器中的Repository）。
 
-這邊會提到三件事
+這邊會提到三件事：
 
 - 如何從Repository取得Image
-- 管理本地主機上的Image；
+- 管理本地主機上的Image
 - 介紹Image實作的基本原理
 
 ##取得映像檔
 
-使用 ```docker pull ``` 命令從Repository取得所需要的Image
+使用 ```docker pull ``` 命令從Repository取得所需要的Image。
+
+下面的例子是從我自己的Docker Hub倉儲下載一個Image。
+
+pull後面是你在Docker Hub上的名稱 Id/Repository。
+
+```
+$ sudo docker pull wolibohebadon/ca22006
+
+latest: Pulling from wolibohebadon/ca22006 //最新的下載image位置在wolibohebadon/ca22006
+759d6771041e: Download complete
+8836b825667b: Download complete
+c2f5e51744e6: Download complete
+a3ed95caeb02: Download complete
+4afafbda1c91: Download complete
+d969199cf5fa: Download complete
+a8b48361e793: Download complete
+c9dfe10bdabc: Download complete
+
+```
+
+另一個例子是從Docker Hub倉儲下載一個Ubuntu14.04作業系統的映像檔。
 
 
+```
+$ sudo docker pull ubuntu:14.04
+14.04: Pulling from library/ubuntu
+943c334059c7: Pull complete 
+a1acf99303d2: Pull complete 
+27616aacb7b3: Pull complete 
+35d12cd1c9fc: Pull complete 
+a3ed95caeb02: Pull complete 
 
+```
 
+下載完畢後，就可以使用這個印象檔，可以建立一個容器,讓他去執行bash
 
+```
 
+$ sudo docker run -ti ubuntu:14.04 /bin/bash   //執行後會進入docker內
+root@1133d5eb031f:/#
 
+```
 
+---
 
+##列出
 
+---
+
+###列出本機映像檔
+
+使用 docker images 顯示本機已有的映像檔。
+
+```
+$ sudo docker images
+REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+<none>                  <none>              ac57e7603ebd        43 hours ago        427.1 MB
+wolibohebadon/ca22006   latest              16a395dcdbb0        43 hours ago        427.1 MB
+ubuntu                  14.04               8fa7f61732d6        5 days ago          188 MB
+ca22006                 latest              bb986c5d7999        5 days ago          427 MB
+node                    5.11.0              8593e962b570        9 days ago          644.3 MB
+
+```
+
+列出訊息中可以看到幾個訊息
+
+- 來自哪一個倉儲(REPOSITORY)，ex: ubuntu
+
+- 映像檔的標記(TAG),ex: 14.04
+
+- Image ID(唯一),ex: 8fa7f61732d6
+
+- 建立時間(CREATED),ex: 5 days ago
+
+- 映像檔大小(SIZE),ex: 188 MB
+
+映像檔的 ID 唯一標識了映像檔，注意到 ubuntu:14.04 和 wolibohebadon/ca22006 不具有相同的映像檔 ID，說明它們是不同樣的映像檔。
+
+TAG 用來標記來自同一個倉儲的不同映像檔。例如 ubuntu 倉儲中有多個映像檔，通過 TAG 來區分發行版本，例如 10.04、12.04、12.10、13.04、14.04 等。
+
+下面的命令指定使用映像檔 ubuntu:14.04 來啟動一個容器。
+
+```
+sudo docker run -ti ubuntu:14.04 /bin/bash
+
+```
+如果沒有指定Tag,預設會使用 latest (只在同一個Id底下最新的那一個)
+
+---
+
+##建立
+
+---
+
+###建立映像檔
+
+建立Image有滿多方法的，User可以在Docker Hub取得已有的Image並Update，也可以在本機建立。
+
+**修改已有映像檔**
