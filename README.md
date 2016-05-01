@@ -346,7 +346,7 @@ root@1cf2317c6e56:/#
 ```
 $ mkdir sinatra
 $ cd sinatra
-$ touch Dockerfile    //若不知道[touch](http://linux.vbird.org/linux_basic/0220filemanager.php#touch)是什麼可以點這裡
+$ touch Dockerfile    //[touch](http://linux.vbird.org/linux_basic/0220filemanager.php#touch)
 ```
 
 
