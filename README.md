@@ -282,3 +282,116 @@ sudo docker run -ti ubuntu:14.04 /bin/bash
 建立Image有滿多方法的，User可以在Docker Hub取得已有的Image並Update，也可以在本機建立。
 
 **修改已有映像檔**
+
+使用下載的Image去啟動Container
+
+```
+$ sudo docker run -t -i ubuntu /bin/bash
+root@0e50fa84f1bb:/# 
+```
+
+這邊的ID記一下
+
+在容器中加入Json的gem套件
+
+P.S.這邊不要複製root@id喔這是你自己的
+
+```
+root@0e50fa84f1bb:/#  gem install json
+```
+
+這邊在Docker內找不到指令
+若沒有gem指令請先安裝
+
+```
+$ sudo apt-get install gem
+$ sudo apt-get install ruby -y  && sudo apt-get install rubygems -y
+$ sudo gem install json  //直接下命令
+```
+執行下面指令後，我們的Container已經被改變，```使用docker commit```命令來提交更新後的副本
+```
+$ sudo docker commit -m "Add json gem" -a "Docker" 0e50fa84f1bb ubuntu:v2
+sha256:87f05893535ed2ca08589181cf3f1616951ef4b3ff55893750218689212e8309
+```
+其中，-m 指定提交的說明信息，跟我們使用的Git版本控制工具一樣；-a 可以指定更新的使用者信息；之後是用來建立映像檔的容器的 ID；最後指定新映像檔的名稱和 tag 。建立成功後會印出新映像檔的 ID。
+
+使用 ```docker images``` 查看新建立的映像檔。
+
+```
+$ sudo docker images
+REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+ubuntu                  v2                  87f05893535e        3 minutes ago       188 MB
+wolibohebadon/ca22006   latest              16a395dcdbb0        46 hours ago        427.1 MB
+ubuntu                  14.04               8fa7f61732d6        5 days ago          188 MB
+ca22006                 latest              bb986c5d7999        5 days ago          427 MB
+node                    5.11.0              8593e962b570        9 days ago          644.3 MB
+
+```
+
+再來就可以使用新的Image來啟動Container
+
+```
+$ sudo docker run -ti ubuntu:v2
+root@1cf2317c6e56:/#
+```
+
+**利用Dockerfile建立映像檔**
+
+利用 ```docker commit``` 擴展Image 比較簡單，可是在團隊中並不方便分享，可以使用力一個方法```docker build```來建立一個新的映像檔。
+
+再這之前，先建立一個Dockerfile，裏面包含一些用來建立Image的指令。
+
+先來建立一個目錄和一個Dockerfile吧
+
+```
+$ mkdir sinatra
+$ cd sinatra
+$ touch Dockerfile    //若不知道[touch](http://linux.vbird.org/linux_basic/0220filemanager.php#touch)是什麼可以點這裡
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
