@@ -206,7 +206,6 @@ a3ed95caeb02: Download complete
 d969199cf5fa: Download complete
 a8b48361e793: Download complete
 c9dfe10bdabc: Download complete
-
 ```
 
 另一個例子是從Docker Hub倉儲下載一個Ubuntu14.04作業系統的映像檔。
@@ -220,16 +219,13 @@ a1acf99303d2: Pull complete
 27616aacb7b3: Pull complete 
 35d12cd1c9fc: Pull complete 
 a3ed95caeb02: Pull complete 
-
 ```
 
 下載完畢後，就可以使用這個印象檔，可以建立一個容器,讓他去執行bash
 
 ```
-
 $ sudo docker run -ti ubuntu:14.04 /bin/bash   //執行後會進入docker內
 root@1133d5eb031f:/#
-
 ```
 
 ---
@@ -250,7 +246,6 @@ wolibohebadon/ca22006   latest              16a395dcdbb0        43 hours ago    
 ubuntu                  14.04               8fa7f61732d6        5 days ago          188 MB
 ca22006                 latest              bb986c5d7999        5 days ago          427 MB
 node                    5.11.0              8593e962b570        9 days ago          644.3 MB
-
 ```
 
 列出訊息中可以看到幾個訊息
@@ -273,7 +268,6 @@ TAG 用來標記來自同一個倉儲的不同映像檔。例如 ubuntu 倉儲�
 
 ```
 sudo docker run -ti ubuntu:14.04 /bin/bash
-
 ```
 如果沒有指定Tag,預設會使用 latest (只在同一個Id底下最新的那一個)
 
