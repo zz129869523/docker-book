@@ -67,7 +67,11 @@ Docker有3個基本概念
 
 這3個就是Docker的整個架構
 
+---
+
 ##映像檔
+
+---
 
 Docker Image 就是一個唯讀的模板。
 
@@ -198,6 +202,7 @@ pull後面是你在Docker Hub上的名稱 Id/Repository。
 $ sudo docker pull wolibohebadon/ca22006
 
 latest: Pulling from wolibohebadon/ca22006 //最新的下載image位置在wolibohebadon/ca22006
+//顯示
 759d6771041e: Download complete
 8836b825667b: Download complete
 c2f5e51744e6: Download complete
@@ -213,6 +218,7 @@ c9dfe10bdabc: Download complete
 
 ```
 $ sudo docker pull ubuntu:14.04
+//顯示
 14.04: Pulling from library/ubuntu
 943c334059c7: Pull complete 
 a1acf99303d2: Pull complete 
@@ -225,6 +231,7 @@ a3ed95caeb02: Pull complete
 
 ```
 $ sudo docker run -ti ubuntu:14.04 /bin/bash   //執行後會進入docker內
+//顯示
 root@1133d5eb031f:/#
 ```
 
@@ -240,6 +247,7 @@ root@1133d5eb031f:/#
 
 ```
 $ sudo docker images
+//顯示
 REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
 <none>                  <none>              ac57e7603ebd        43 hours ago        427.1 MB
 wolibohebadon/ca22006   latest              16a395dcdbb0        43 hours ago        427.1 MB
@@ -287,6 +295,7 @@ sudo docker run -ti ubuntu:14.04 /bin/bash
 
 ```
 $ sudo docker run -t -i ubuntu /bin/bash
+//顯示
 root@0e50fa84f1bb:/# 
 ```
 
@@ -297,6 +306,7 @@ root@0e50fa84f1bb:/#
 P.S.這邊不要複製root@id喔這是你自己的
 
 ```
+//顯示
 root@0e50fa84f1bb:/#  gem install json
 ```
 
@@ -319,6 +329,7 @@ sha256:87f05893535ed2ca08589181cf3f1616951ef4b3ff55893750218689212e8309
 
 ```
 $ sudo docker images
+//顯示
 REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
 ubuntu                  v2                  87f05893535e        3 minutes ago       188 MB
 wolibohebadon/ca22006   latest              16a395dcdbb0        46 hours ago        427.1 MB
@@ -351,18 +362,351 @@ $ touch Dockerfile
 這邊可以參考touch：
 [連結](http://linux.vbird.org/linux_basic/0220filemanager.php#touch)
 
+Dockerfile 中每一條指令都會建立一層Image
+
+```
+FROM ubuntu:14.04
+MAINTAINER <wolibohebadon@gmail.com>    
+RUN apt-get update && apt-get -y upgrade
+RUN curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
+RUN apt-get install -y nodejs git npm
+```
+Dockerfile 基本的語法是
+
+- 使用#來註釋
+
+- FROM 指令告訴 Docker 使用哪個Image作為基底
+
+- 接著是維護者的信息
+
+- RUN開頭的指令會在建立中執行，比如安裝一個套件，在這裏使用 apt-get 來安裝了一些套件
+
+完成 Dockerfile 後可以使用 docker build 建立Image。
+
+```
+$ sudo docker build -t="ubuntu:v2" .
+//顯示
+Sending build context to Docker daemon 2.048 kB
+Step 1 : FROM ubuntu:14.04
+ ---> 8fa7f61732d6
+Step 2 : MAINTAINER <wolibohebadon@gmail.com>
+ ---> Using cache
+ ---> 2a36e155695b
+Step 3 : RUN apt-get update && apt-get -y upgrade
+ ---> Using cache
+ ---> ce1215bc3de5
+Step 4 : RUN curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
+ ---> Using cache
+ ---> eedbe2998d71
+Step 5 : RUN apt-get install -y nodejs git npm
+ ---> Using cache
+ ---> cbb6010622f8
+Successfully built cbb6010622f8
+```
+其中 -t 標記添加 tag，指定新的Image的使用者信息。 “.” 是 Dockerfile 所在的路徑（當前目錄），也可以換成具體的 Dockerfile 的路徑。
+
+可以看到 build 指令後執行的操作。第一件事情就是上傳這個 Dockerfile 內容，因為所有的操作都要依據 Dockerfile 來進行。 然後，Dockfile 中的指令被一條一條的執行。每一步都建立了一個新的容器，在容器中執行指令並提交修改（就跟之前介紹過的 docker commit 一樣）。當所有的指令都執行完畢之後，返回了最終的映像檔 Id。所有的中間步驟所產生的容器都會被刪除和清理。
+
+P.S.Image 不能超過127行指令
+
+現在可以用新建立的Image啟動一個容器。
+
+```
+$ sudo docker run -ti ubuntu:v2 /bin/bash
+root@81b8fd65d871:/# 
+```
+還可以用 ```docker tag``` 命令修改Image的TAG。
+
+```
+$ sudo docker tag cbb6010622f8 ubuntu:devel
+$ sudo docker images
+//顯示
+REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+ubuntu                  devel               cbb6010622f8        13 minutes ago      408.1 MB
+ubuntu                  v2                  cbb6010622f8        13 minutes ago      408.1 MB
+<none>                  <none>              87f05893535e        57 minutes ago      188 MB
+wolibohebadon/ca22006   latest              16a395dcdbb0        47 hours ago        427.1 MB
+ubuntu                  14.04               8fa7f61732d6        5 days ago          188 MB
+ca22006                 latest              bb986c5d7999        5 days ago          427 MB
+node                    5.11.0              8593e962b570        9 days ago          644.3 MB
+```
+
+**上傳映像檔**
+
+使用者可以通過 docker push 命令，把自己建立的Image上傳到倉儲中來共享。例如，使用者在 Docker Hub 上完成註冊後，可以推送自己的Image到倉儲中。
+
+先登入Docker Hub
+
+```
+$ sudo docker login
+```
+上傳之前，有一點需要注意，Docker Hub 的格式為 UserName/Repository，所以這邊我們要先改名一下，不然會傳不上去，我們先用以下指令查看我們目前有哪些 Image。
+
+```
+$ sudo docker images
+//顯示
+REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+ubuntu                  v2                  cbb6010622f8        31 minutes ago      408.1 MB
+wolibohebadon/ca22006   latest              16a395dcdbb0        47 hours ago        427.1 MB
+ubuntu                  14.04               8fa7f61732d6        5 days ago          188 MB
+ca22006                 latest              bb986c5d7999        5 days ago          427 MB
+node                    5.11.0              8593e962b570        9 days ago          644.3 MB
+
+$ sudo docker tag ubuntu:v2 wolibohebadon/ubuntu:v2
+//顯示
+REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+wolibohebadon/ubuntu    v2                  cbb6010622f8        31 minutes ago      408.1 MB
+wolibohebadon/ca22006   latest              16a395dcdbb0        47 hours ago        427.1 MB
+ubuntu                  14.04               8fa7f61732d6        5 days ago          188 MB
+ca22006                 latest              bb986c5d7999        5 days ago          427 MB
+node                    5.11.0              8593e962b570        9 days ago          644.3 MB
+```
+改完名稱後就可以開始上傳了
+
+```
+$ sudo docker push wolibohebadon/ubuntu
+
+//顯示
+Sending image list
+The push refers to a repository [docker.io/wolibohebadon/ubuntu]
+```
+
+---
+
+##存取和載入
+
+---
+
+###儲存和載入映像檔
+
+**儲存映像檔**
+
+如果要建立Image到本地檔案，可以使用 ```docker save``` 命令。
+
+```
+$ sudo docker images
+//顯示
+REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+wolibohebadon/ubuntu    v2                  cbb6010622f8        52 minutes ago      408.1 MB
+$ sudo docker save -o ubuntu_14.04.tar ubuntu:14.04
+```
+**載入映像檔**
+
+可以使用 ```docker load```從建立的本地檔案中再匯入到本地Image庫，例如
+
+```
+sudo docker load --input ubuntu_14.04.tar
+//或
+sudo docker load < ubuntu_14.04.tar
+```
+可以匯入之前儲存的Image
+
+---
+
+##移除
+
+---
+
+##移除本地端映像檔
+
+如果要移除本地端的Image，可以使用 ```docker rmi``` 命令。注意 ```docker rm ```命令是移除容器。
+
+```
+$sudo docker rmi wolibohebadon/ubuntu:v2
+//顯示
+$ sudo docker rmi wolibohebadon/ubuntu:v2
+Untagged: wolibohebadon/ubuntu:v2
+Deleted: sha256:cbb6010622f87b6d012f6b05202b3e1cca54688746b3a52dd9cdce3ea1184fb5
+Deleted: sha256:d5137fa1b9f404280a7cedbce21318309ba9de17061fee9be40211ccd48b8929
+Deleted: sha256:eedbe2998d7104f25da20b2b4fcd19f03572dbb656d7ee4f5e27e0c51196bc7b
+Deleted: sha256:ce1215bc3de5d63bca766e5321323a681538f9b558554101722d39e20e0920bd
+Deleted: sha256:daa9093d9660b8078b2072a9489d62d8720d5aee629d2d59d99b85de4e33b19a
+Deleted: sha256:2a36e155695be823372b0c975a45bbec2a027f1d9d4b962e37bfbfdc0297203c
+```
+P.S.：在刪除映像檔之前要先用 ```docker rm``` 刪掉依賴於這個Image的所有Container。
+
+---
+
+#容器
+
+---
+
+##啟動
+
+---
+
+###啟動容器
 
 
+啟動容器有兩種方式，一種是將Image新建一個Container並啟動，另外一個是將終止狀態（stopped）的容器重新啟動。
 
+因為 Docker 的容器實在太輕量級了，User可以隨時刪除和新建立Container。
 
+**新增並啟動**
 
+所需要的命令主要為 ```docker run```。
 
+下面的命令輸出一個 “Hello World”，之後終止容器。
 
+EX:
+```
+$ sudo docker run ubuntu:14.04 /bin/echo 'Hello world'
+//顯示
+Hello world
+```
 
+這跟在本地直接執行 /bin/echo 'hello world' 相同， 幾乎感覺不出任何區別。
 
+下面的命令則啟動一個 bash 終端，允許使用者進行互動。
 
+```
+$ sudo docker run -ti ubuntu:14.04 /bin/bash
+//顯示
+root@4d829b6cb093:/# 
+```
+其中，-t 選項讓Docker分配一個虛擬終端（pseudo-tty）並綁定到Container的標準輸入上， -i則讓容器的標準輸入保持打開的狀態。
 
+在互動模式下，使用者可以透過所建立的終端來輸入命令
 
+EX：
+
+```
+root@af8bae53bdd3:/# pwd
+/
+root@af8bae53bdd3:/# ls
+bin boot dev etc home lib lib64 media mnt opt proc root run sbin srv sys tmp usr var
+```
+參考資料：
+[pwd](http://linux.vbird.org/linux_basic/0220filemanager.php#pwd)
+[ls](http://linux.vbird.org/linux_basic/0220filemanager.php#ls)
+
+當利用 ```docker run``` 來建立Container時，Docker 在後臺執行的標準操作包括：
+
+- 檢查本地是否存在指定的Image，不存在就從公有倉儲下載
+
+- 利用Image建立並啟動一個容器
+
+- 分配一個檔案系統，並在唯讀的Image層外面掛載一層可讀寫層
+
+- 從宿主主機設定的網路橋界面中橋接一個虛擬埠到Container中
+
+- 從位址池中設定一個 ip 位址給容器
+
+- 執行使用者指定的應用程式
+
+- 執行完畢後Container被終止
+
+**啟動已終止容器**
+
+可以利用 ```docker start``` 命令，直接將一個已經終止的容器啟動執行。
+
+Container的核心為所執行的應用程式，需要的資源都是應用程式執行所必需的。所以並沒有其它的資源。可以在虛擬終端中利用 ```ps``` 或 ```top``` 來查看程式訊息。
+
+```
+root@4d829b6cb093:/# ps
+  PID TTY          TIME CMD
+    1 ?        00:00:00 bash
+   20 ?        00:00:00 ps
+```
+這邊可以看到ㄉContainer中僅執行了指定的 bash 應用。這個特點讓 Docker 對資源的使用率極高，果然是輕量級虛擬化。
+
+---
+##守護態執行
+
+---
+
+###守護態執行
+
+---
+
+更多的時候，需要讓 Docker Container在後臺以守護態（Daemonized）形式執行。此時，可以透過新增 -d 參數來實作。
+
+下面的命令會在後臺執行Container。
+
+EX:
+
+```
+$ sudo docker run -d ubuntu:14.04 /bin/sh -c "while true; do echo hello world; sleep 1; done"
+//顯示
+c18eb0e7e0a6281277c6135e5df5161ad70d03954b0949615cc94650ad745051
+```
+Container啟動後會返回一個唯一的 id，也可以透過 docker ps 命令來查看Container訊息。
+
+```
+$ sudo docker ps
+//顯示
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+c18eb0e7e0a6        ubuntu:14.04        "/bin/sh -c 'while tr"   8 minutes ago       Up 8 minutes                            cranky_minsky
+```
+要取得Container的輸出訊息，可以透過```docker logs``` 命令。
+
+```
+$ sudo docker logs cranky_minsky
+//顯示
+hello world
+hello world
+hello world
+. . .
+```
+
+---
+##終止
+---
+###終止容器
+
+可以使用 ```docker stop``` 來終止一個執行中的容器。
+
+當Docker Container中指定的應用終結時，Container也自動終止。 例如對於上一章節中只啟動了一個終端機的Container，使用者透過 exit 命令或 Ctrl+d 來退出終端時，所建立的Container立刻終止。
+
+終止狀態的Container可以用 ```docker ps -a``` 命令看到。
+
+EX：
+
+```
+$ sudo docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                        PORTS               NAMES
+ee3431ffe4b3        ubuntu:14.04        "/bin/sh -c 'while tr"   9 minutes ago       Up 9 minutes                                      kickass_swartz
+4b4d2b481352        ubuntu:14.04        "/bin/sh -c 'while tr"   9 minutes ago       Up 9 minutes                                      cranky_panini
+```
+處於終止狀態的容器，可以透過 ```docker start``` 命令來重新啟動。
+
+```
+$ sudo docker start c10bdd5f2d28       //c10bdd5f2d28是你要開啟的id
+```
+此外，```docker restart``` 命令會將一個執行中的容器終止，然後再重新啟動它。
+
+```
+$ sudo docker restart 4b4d2b481352     //4b4d2b481352是你要重啟的id
+```
+
+---
+##進入容器
+---
+###進入容器
+---
+
+在使用 ```-d``` 參數時，Container啟動後會進入後臺。 某些時候需要進入Container進行操作，有很多種方法，包括使用 ```docker attach``` 命令或 ```nsenter``` 工具等。
+
+**exec 命令**
+```
+$ sudo docker run -tdi ubuntu
+//顯示
+80787210307a297f886c851e803a142a8fcb5a0f0b7aec1d1a7e2c772284d652
+$ sudo docker ps
+//顯示
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+80787210307a        ubuntu              "/bin/bash"         13 seconds ago      Up 12 seconds                           boring_easley
+$ sudo docker exec -ti boring_easley bash
+//顯示
+root@80787210307a:/# 
+```
+**attach 命令**
+
+```docker attach``` 亦是Docker內建的命令。下面示例如何使用該命令。
+
+```
+
+```
 
 
 
