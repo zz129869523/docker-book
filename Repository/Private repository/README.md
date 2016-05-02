@@ -1,8 +1,7 @@
 # 6.2. 私有倉儲
 
+
 ##私有倉庫
----
-###私有倉庫
 ---
 
 有時候使用 Docker Hub 這樣的公共Repository可能不方便，使用者可以建立一個本機Repository供私人使用。
@@ -70,3 +69,9 @@ $ sudo python setup.py install
 ```
 $ cp config/config_sample.yml config/config.yml
 ```
+啟動 Web 服務
+
+```
+$ sudo gunicorn --access-logfile - --error-logfile - -k gevent -b 0.0.0.0:5000 -w 4 --max-requests 100 docker_registry.wsgi:application
+```
+此時使用連結本機的 5000 連接埠，看到輸出``` docker-registry```的版本訊息說明執行成功。
