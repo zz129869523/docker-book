@@ -8,9 +8,9 @@
 
 - 倉儲分為公開倉庫（Public）和私有倉儲（Private）兩種形式。
 
-- 最大的公開倉庫是 Docker Hub，存放了非常多的映像檔供User download。 大陸的公開倉庫包括 Docker Pool 等，可以提供大陸使用者更穩定快速的存取。然後User還可以在自己的Docker Hub內建立一個私有倉儲(Private)。
+- 最大的公開倉庫是 Docker Hub，存放了非常多的映像檔供使用者 pull下來使用。 大陸的公開倉庫就為 Docker Pool為最大，可以提供大陸使用者更穩定快速的存取。然後User還可以在自己的Docker Hub內建立一個私有倉儲(Private)。
 
-- User建立了自己的Image之後就可以使用 push 命令將它上傳到公有或者私有倉儲，當我要在另外一台機器上使用這個Image時候，只需要從倉儲上 pull 下來就可以使用。
+- 使用者建立了自己的Image後可使用 push 命令將它上傳到公有或者私有倉儲，當我要在另外一台機器上使用這個Image時候，只需要從倉儲上 pull 下來就可以使用。
 
 P.S.：Docker 倉儲的概念跟 Git 類似，註冊伺服器可以把他想成跟GitHub一樣是一個分享自己Image的地方。
 
