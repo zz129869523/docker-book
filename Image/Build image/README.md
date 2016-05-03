@@ -98,7 +98,7 @@ Dockerfile 基本的語法是
 
 - 接著是維護者的信息
 
-- RUN開頭的指令會在建立中執行，比如安裝一個套件，在這裏使用 apt-get 來安裝了一些套件
+  - RUN開頭的指令會在建立中執行，比如安裝一個套件，在這裏使用 apt-get 來安裝了一些套件
 
 完成 Dockerfile 後可以使用 docker build 建立Image。
 

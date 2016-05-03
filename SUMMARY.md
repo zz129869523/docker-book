@@ -9,7 +9,7 @@
    * [2.3. 倉儲](Basic concepts/Docker repository/README.md)
    * [2.2. 容器](Basic concepts/Docker container/README.md)
 * [3.安裝](Install/README.md)
-   * [3.1 Ubuntu](Install/Ubuntu/README.md)
+   * [3.1. Ubuntu](Install/Ubuntu/README.md)
 * [4.映像檔](Image/README.md)
    * [4.1. 取出映像檔](Image/Taking image/README.md)
    * [4.2. 列出](Image/Lists/README.md)
